@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HA Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>HA Manager</h1>
+    <div id="status"></div>
+    <button onclick="fetchStatus()">Refresh Status</button>
+    <h2>Power On Server</h2>
+    <form id="poweron-form" onsubmit="return powerOnServer()">
+        <label for="ip">IP:</label>
+        <input type="text" id="ip" name="ip">
+        <label for="api_key">API Key:</label>
+        <input type="text" id="api_key" name="api_key">
+        <button type="submit">Power On</button>
+    </form>
+    <h2>Migrate VM</h2>
+    <form id="migrate-form" onsubmit="return migrateVM()">
+        <label for="vmid">VM ID:</label>
+        <input type="text" id="vmid" name="vmid">
+        <label for="target_node">Target Node:</label>
+        <input type="text" id="target_node" name="target_node">
+        <button type="submit">Migrate</button>
+    </form>
+    <script>
+        function fetchStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status').innerHTML = JSON.stringify(data, null, 2);
+                });
+        }
+        function powerOnServer() {
+            const formData = new FormData(document.getElementById('poweron-form'));
+            const data = Object.fromEntries(formData);
+            fetch('/poweron', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(response => response.json())
+              .then(data => alert('Power on command sent: ' + data.status));
+            return false;
+        }
+        function migrateVM() {
+            const formData = new FormData(document.getElementById('migrate-form'));
+            const data = Object.fromEntries(formData);
+            fetch('/migrate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(response => response.json())
+              .then(data => alert('Migration command sent: ' + data.status));
+            return false;
+        }
+    </script>
+</body>
+</html>
