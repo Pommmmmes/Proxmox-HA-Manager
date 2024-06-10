@@ -1,0 +1,86 @@
+import os
+import psycopg2
+from psycopg2 import sql
+
+DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@localhost:5432/mydatabase')
+
+def get_config(table, key):
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    cur.execute(sql.SQL("SELECT value FROM {} WHERE key = %s").format(sql.Identifier(table)), [key])
+    value = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return value
+
+# Base configuration
+BASE_CONFIG = {
+    'database_location': 'localhost',
+    # Other base configurations
+}
+
+# Load Proxmox configuration
+PROXMOX_CONFIG = {
+    'api_url': get_config('proxmox_config', 'api_url'),
+    'username': get_config('proxmox_config', 'username'),
+    'password': get_config('proxmox_config', 'password'),
+    # Other Proxmox configurations
+}
+
+# Load HPE iLO configuration
+HPE_ILO_CONFIG = {
+    'api_url': get_config('hpe_ilo_config', 'api_url'),
+    'username': get_config('hpe_ilo_config', 'username'),
+    'password': get_config('hpe_ilo_config', 'password'),
+    # Other HPE iLO configurations
+}
+
+
+### Config should look like
+import os
+import psycopg2
+from psycopg2 import sql
+
+# Base configuration
+BASE_CONFIG = {
+    'database_location': 'localhost',
+    # Add other base configurations here if needed
+}
+
+# Environment variable for the database URL
+DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@localhost:5432/mydatabase')
+
+def get_config(table, key):
+    """
+    Fetch a configuration value from the specified table in the PostgreSQL database.
+    
+    Args:
+    table (str): The name of the table to query.
+    key (str): The key of the configuration to retrieve.
+
+    Returns:
+    str: The configuration value.
+    """
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    cur.execute(sql.SQL("SELECT value FROM {} WHERE key = %s").format(sql.Identifier(table)), [key])
+    value = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return value
+
+# Load Proxmox configuration
+PROXMOX_CONFIG = {
+    'api_url': get_config('proxmox_config', 'api_url'),
+    'username': get_config('proxmox_config', 'username'),
+    'password': get_config('proxmox_config', 'password'),
+    # Add other Proxmox configurations here if needed
+}
+
+# Load HPE iLO configuration
+HPE_ILO_CONFIG = {
+    'api_url': get_config('hpe_ilo_config', 'api_url'),
+    'username': get_config('hpe_ilo_config', 'username'),
+    'password': get_config('hpe_ilo_config', 'password'),
+    # Add other HPE iLO configurations here if needed
+}
