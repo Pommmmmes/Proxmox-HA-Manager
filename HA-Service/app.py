@@ -1,11 +1,26 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template
+from flask_sqlalchemy import SQLAlchemy
 import requests
 import subprocess
-import json
 import os
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+db = SQLAlchemy(app)
+
+class Server(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(db.String(50), nullable=False)
+    user = db.Column(db.String(50), nullable=False)
+    api_key = db.Column(db.String(200), nullable=False)
+
+class VMConfig(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    vmid = db.Column(db.String(50), nullable=False)
+    target_node = db.Column(db.String(50), nullable=False)
+
+# Initialize the database
+db.create_all()
 
 # Get node statistics using Proxmox API key
 def get_node_stats():
@@ -15,7 +30,6 @@ def get_node_stats():
 
 # Power on server via iLO using API key
 def power_on_server(ip, api_key):
-    headers = {"Authorization": f"Bearer {api_key}"}
     cmd = f"ipmitool -I lanplus -H {ip} -U {api_key} chassis power on"
     subprocess.run(cmd, shell=True)
 
@@ -51,18 +65,15 @@ def migrate():
 @app.route('/config', methods=['GET', 'POST'])
 def config():
     if request.method == 'POST':
-        # Save configuration
-        with open('config.json', 'w') as config_file:
-            json.dump(request.json, config_file)
+        # Save configuration to the database
+        server = Server(ip=request.json['ip'], user=request.json['user'], api_key=request.json['api_key'])
+        db.session.add(server)
+        db.session.commit()
         return jsonify({"status": "success"})
     else:
-        # Load configuration
-        if os.path.exists('config.json'):
-            with open('config.json', 'r') as config_file:
-                config = json.load(config_file)
-            return jsonify(config)
-        else:
-            return jsonify({})
+        # Load configuration from the database
+        servers = Server.query.all()
+        return jsonify([{"ip": server.ip, "user": server.user, "api_key": server.api_key} for server in servers])
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)

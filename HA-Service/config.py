@@ -4,3 +4,6 @@ ILO_API_KEYS = {
     'server1-ip': 'server1_api_key',
     'server2-ip': 'server2_api_key'
 }
+
+SQLALCHEMY_DATABASE_URI = 'postgresql://username:password@localhost/ha_manager'
+SQLALCHEMY_TRACK_MODIFICATIONS = False
