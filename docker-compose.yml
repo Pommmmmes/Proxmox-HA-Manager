@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: config_db
+      POSTGRES_USER: config_user
+      POSTGRES_PASSWORD: supersecret
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - proxmox-ha-network
+
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: config_db
+      DB_USER: config_user
+      DB_PASSWORD: supersecret
+    depends_on:
+      - db
+    networks:
+      - proxmox-ha-network
+
+volumes:
+  db_data:
+
+networks:
+  proxmox-ha-network:
