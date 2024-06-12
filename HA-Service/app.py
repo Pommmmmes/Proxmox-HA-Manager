@@ -46,6 +46,7 @@ def migrate_vm(vmid, target_node):
     data = {"target": target_node}
     requests.post(f"{proxmox_config['api_url']}/nodes/node1/qemu/{vmid}/migrate", headers=headers, data=data, verify=False)
 
+# Default rout leading to the index that will show the overview page
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -67,6 +68,7 @@ def migrate():
     migrate_vm(data['vmid'], data['target_node'])
     return jsonify({"status": "success"})
 
+# Flask Config for the configuration page
 @app.route('/config', methods=['GET', 'POST'])
 def config():
     if request.method == 'POST':
