@@ -23,10 +23,10 @@ COPY setup_db.sh .
 # Make the setup script executable
 RUN chmod +x setup_db.sh
 
-# Expose the port that the Flask app runs on
-EXPOSE 5000
-
 # Use an entrypoint script to initialize the database and start the Flask app
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]
+
+# Expose the port that the Flask app runs on
+EXPOSE 5000

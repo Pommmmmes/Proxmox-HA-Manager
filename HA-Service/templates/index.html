@@ -2,59 +2,119 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HA Manager</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Proxmox HA Manager</title>
+    <link rel="stylesheet" href="https://unpkg.com/@clr/ui/clr-ui.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@clr/icons/clr-icons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@clr/icons/clr-icons.min.css">
+    <script src="https://unpkg.com/@clr/icons/clr-icons.min.js"></script>
+    <script src="https://unpkg.com/@clr/ui/clr-ui.min.js"></script>
 </head>
 <body>
-    <h1>HA Manager</h1>
-    <div id="status"></div>
-    <button onclick="fetchStatus()">Refresh Status</button>
-    <h2>Power On Server</h2>
-    <form id="poweron-form" onsubmit="return powerOnServer()">
-        <label for="ip">IP:</label>
-        <input type="text" id="ip" name="ip">
-        <label for="api_key">API Key:</label>
-        <input type="text" id="api_key" name="api_key">
-        <button type="submit">Power On</button>
-    </form>
-    <h2>Migrate VM</h2>
-    <form id="migrate-form" onsubmit="return migrateVM()">
-        <label for="vmid">VM ID:</label>
-        <input type="text" id="vmid" name="vmid">
-        <label for="target_node">Target Node:</label>
-        <input type="text" id="target_node" name="target_node">
-        <button type="submit">Migrate</button>
-    </form>
+    <header class="header-6">
+        <div class="branding">
+            <a href="#" class="nav-link">
+                <clr-icon shape="vm-bug"></clr-icon>
+                <span class="title">Proxmox HA Manager</span>
+            </a>
+        </div>
+    </header>
+    <div class="content-container">
+        <div class="sidenav">
+            <div class="nav-group">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">
+                            <clr-icon shape="home"></clr-icon>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/status" class="nav-link">
+                            <clr-icon shape="bar-chart"></clr-icon>
+                            Status
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/config" class="nav-link">
+                            <clr-icon shape="cog"></clr-icon>
+                            Configuration
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <main class="main-content">
+            <div class="content-area">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Node Statistics</h3>
+                    </div>
+                    <div class="card-block">
+                        <div id="stats"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Power On Server</h3>
+                    </div>
+                    <div class="card-block">
+                        <form id="poweron-form">
+                            <div class="form-group">
+                                <label for="server-ip">Server IP:</label>
+                                <input type="text" id="server-ip" name="ip" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Power On</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Migrate VM</h3>
+                    </div>
+                    <div class="card-block">
+                        <form id="migrate-form">
+                            <div class="form-group">
+                                <label for="vmid">VM ID:</label>
+                                <input type="text" id="vmid" name="vmid" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="target-node">Target Node:</label>
+                                <input type="text" id="target-node" name="target_node" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Migrate</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        function fetchStatus() {
-            fetch('/status')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('status').innerHTML = JSON.stringify(data, null, 2);
+        $(document).ready(function() {
+            // Fetch and display node stats
+            $.get("/status", function(data) {
+                $("#stats").text(JSON.stringify(data, null, 2));
+            });
+
+            // Handle Power On form submission
+            $("#poweron-form").submit(function(event) {
+                event.preventDefault();
+                $.post("/poweron", { ip: $("#server-ip").val() }, function(data) {
+                    alert("Server powered on successfully!");
                 });
-        }
-        function powerOnServer() {
-            const formData = new FormData(document.getElementById('poweron-form'));
-            const data = Object.fromEntries(formData);
-            fetch('/poweron', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            }).then(response => response.json())
-              .then(data => alert('Power on command sent: ' + data.status));
-            return false;
-        }
-        function migrateVM() {
-            const formData = new FormData(document.getElementById('migrate-form'));
-            const data = Object.fromEntries(formData);
-            fetch('/migrate', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            }).then(response => response.json())
-              .then(data => alert('Migration command sent: ' + data.status));
-            return false;
-        }
+            });
+
+            // Handle Migrate form submission
+            $("#migrate-form").submit(function(event) {
+                event.preventDefault();
+                $.post("/migrate", {
+                    vmid: $("#vmid").val(),
+                    target_node: $("#target-node").val()
+                }, function(data) {
+                    alert("VM migrated successfully!");
+                });
+            });
+        });
     </script>
 </body>
 </html>
