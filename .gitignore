@@ -330,12 +330,12 @@ cython_debug/
 
 *lib64*/*
 
-package.json
+.package.json
 
-package-lock.json
+.package-lock.json
 
-pyvenv.cfg
+.pyvenv.cfg
 
-node_modules/
+.node_modules/
 
-bin
+.bin
