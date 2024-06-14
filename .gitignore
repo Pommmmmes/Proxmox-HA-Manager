@@ -328,14 +328,14 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-*lib64*/*
+lib64/
 
-package.json
+HA-Service/package.json
 
-package-lock.json
+HA-Service/package-lock.json
 
-pyvenv.cfg
+HA-Service/pyvenv.cfg
 
-node_modules/
+HA-Service/node_modules/
 
-bin
+HA-Service/bin
